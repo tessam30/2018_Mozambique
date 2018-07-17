@@ -33,8 +33,24 @@ df <-
 # Step 2. Create standardized names for each column that will facilitate a reshape
 df %>% 
   rename( school_id = `Levantamento de dados das escolas dos distritos de Zambezia e Nampula`,
-          province = "X__1",
-          district = "X__@")
+          province = X__1,
+          district = X__2,
+          admin_post = X__3,
+          zip_name_no = X__4,
+          school_name = X__5,
+          school_code = X__6,
+          language_school = X__7,
+          other_ngos = X__8,
+          ngo_name = X__9,
+          urban = X__10,
+          bilingual = X__12,
+          aea = X__13,
+          latitude = X__14,
+          longitude = X__15,
+          period_taugh = X__16,
+          TBD = X__19, # Need consistent naming starting here
+          no_students = X__27,
+          ) %>% names()
 
 
 # Step 3. 

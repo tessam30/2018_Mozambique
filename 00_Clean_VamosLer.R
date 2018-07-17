@@ -24,7 +24,19 @@ df <- read_excel(file.path(datapath, ler_data),
 
 # Now need to fix up the first four rows
 # Step 1. Identify all columns that have totals -- drop them
+tot_rm <- c("X__26", "X__29", "X__32", "X__35", "X__38", "X__41", "X__44", 
+            "X__47", "X__48", "X__50", "X__51")
+df <- 
+  df %>% 
+  select(-tot_rm)
+
 # Step 2. Create standardized names for each column that will facilitate a reshape
+df %>% 
+  rename( school_id = `Levantamento de dados das escolas dos distritos de Zambezia e Nampula`,
+          province = "X__1",
+          district = "X__@")
+
+
 # Step 3. 
             
             

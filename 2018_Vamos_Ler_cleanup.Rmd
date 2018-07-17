@@ -1,0 +1,31 @@
+---
+title: "2018_Vamos_Ler!_cleanup"
+author: "Tim Essam"
+date: "7/17/2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+### Instructions for Cleaning Vamos Ler! Data
+
+
+This document captures the data cleaning process for the Vamos Ler Data. The purpose of the code is to demonstrate the process by which the data are transformed into a tidy dataset. The .R file to reproduce the analysis is captured in the ```00_Clean_VamosLer.R``` file.
+
+After reading the data into the global environment, we can check the structure of the Excel table using the ```head``` function:
+
+```{r, echo = TRUE}
+head(df)
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.

@@ -126,10 +126,27 @@ tmp_gend <- df_mod %>%
      
      # Convert columns that are truly numbers to numeric
      mutate_at(vars(school_id, TBD, female_classsize, male_classsize), 
-               funs(as.numeric(.)))
+               funs(as.numeric(.))) %>% 
+     mutate(grade_classsize = female_classsize + male_classsize,
+            grade_mf_ratio = male_classsize / female_classsize) %>% 
+     group_by(school_id) %>% 
+     mutate(total_classsize = sum(grade_classsize, na.rm = TRUE), 
+            total_classsize_female = sum(female_classsize, na.rm = TRUE),
+            total_classsize_male = sum(male_classsize, na.rm = TRUE), 
+            total_mf_ratio = total_classsize_male/total_classsize_female) %>% 
+     ungroup() %>% 
+     arrange(school_id)
+   
+# In browsing the data, there appear to be some grades with 0 students and other grades
+   # where the student ratio is not reasonable
+   
    
 # Create one more cut where male female classsize is reshaped one more time
-   
+   more_tidy_df <- 
+     tidy_df %>% 
+     gather(key = "student_sex", value = "classize", female_classsize:male_classsize) %>% 
+     separate(student_sex, c("sex", "remove_me")) %>% 
+     select(-remove_me)
 
 
             

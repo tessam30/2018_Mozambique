@@ -1,11 +1,11 @@
 # Purpose: Clean up Vamos Ler! Data for Igor in Mozambique
 # Author: Tim Essam, Ph.D | USAID GeoCenter
-# Date: 2018_07_
+# Date: 2018_07_18
 
 # Load libraries and data -------------------------------------------------
 
 # INSTALL LIBRARIES
-pacman::p_load("tidyverse", "lubridate", "sf", "extrafont", "readxl")
+pacman::p_load("tidyverse", "lubridate", "sf", "extrafont", "readxl", "measurements")
 
 dir.create("Data")
 datapath <- "Data"
@@ -95,6 +95,7 @@ df_mod <-
   df_mod %>% names()
   str(df_mod)
   sum(duplicated(df_mod$school_id)) # if this is anythign different than 0, not unique
+  sum(duplicated(df_mod$school_code))
 
 
 # Step 4. Start gathering, separating to reshape the data long
@@ -107,7 +108,7 @@ df_mod <-
     select(-starts_with("classsize")) %>% 
     gather(., key = "key", value = "value", periodtaught_first:TBD_seventh) %>% 
     separate(key, c("metric", "grade")) %>% 
-    spread(metric, value) %>% 
+    spread(metric, value) 
   
 tmp_gend <- df_mod %>% 
     select(starts_with("classsize"), school_id) %>% 
@@ -124,7 +125,7 @@ tmp_gend <- df_mod %>%
                y = tmp_gend, 
                by = c("school_id", "grade")) %>%
      
-     # Convert columns that are truly numbers to numeric
+     # Convert columns that are truly numbers to numeric, create new variables as well
      mutate_at(vars(school_id, TBD, female_classsize, male_classsize), 
                funs(as.numeric(.))) %>% 
      mutate(grade_classsize = female_classsize + male_classsize,
@@ -139,8 +140,8 @@ tmp_gend <- df_mod %>%
    
 # In browsing the data, there appear to be some grades with 0 students and other grades
    # where the student ratio is not reasonable
-   
-   
+   summary(tidy_df)
+
 # Create one more cut where male female classsize is reshaped one more time
    more_tidy_df <- 
      tidy_df %>% 

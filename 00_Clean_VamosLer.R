@@ -128,7 +128,13 @@ tmp_gend <- df_mod %>%
      # Convert columns that are truly numbers to numeric, create new variables as well
      mutate_at(vars(school_id, TBD, female_classsize, male_classsize), 
                funs(as.numeric(.))) %>% 
-     mutate(grade_classsize = female_classsize + male_classsize,
+     
+     # Convert any negative values to positive for classsize
+     mutate(female_classsize = ifelse(female_classsize < 0, (-1*female_classsize), female_classsize),
+            male_classsize = ifelse(male_classsize < 0 , (-1 * male_classsize), male_classsize)) %>% 
+     
+     # Create grouped variables
+    mutate(grade_classsize = female_classsize + male_classsize,
             grade_mf_ratio = male_classsize / female_classsize) %>% 
      group_by(school_id) %>% 
      mutate(total_classsize = sum(grade_classsize, na.rm = TRUE), 

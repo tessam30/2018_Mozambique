@@ -142,6 +142,11 @@ tmp_gend <- df_mod %>%
    # where the student ratio is not reasonable
    summary(tidy_df)
 
+
+# Export tidy datasets ----------------------------------------------------
+
+ 
+   
 # Create one more cut where male female classsize is reshaped one more time
    more_tidy_df <- 
      tidy_df %>% 

@@ -3,7 +3,7 @@
 # Date: 2018_07_18
 
 # Source 00_Clean_VamosLer.R if not already executed.
-
+source("00_Clean_VamosLer.R")
 
 # Load Latitude and Longitude Data ----------------------------------------
 
@@ -20,8 +20,8 @@ geo_df <- read_excel(file.path(datapath, coord_data),
     filter(n != 1) %>% 
     arrange(-n)
   
-# Keep only what is needed to fix Lat/Lon
-  geo_df <- 
+# Keep only what is needed to fix Lat/Lon; Flag schools with completed data
+  geo_df_sub <- 
     geo_df %>% 
     select(latitude = Lat.,
            longitude = Long., 
@@ -36,15 +36,19 @@ geo_df <- read_excel(file.path(datapath, coord_data),
 # Schools with completed latitude longitude -------------------------------
 
   geo_df_filled <- 
-    geo_df %>% 
+    geo_df_sub %>% 
     filter(coord_flag == "TRUE") %>% 
-    mutate_at(vars(latitude, longitude), funs(as.numeric(.)))
-  
-
+    mutate_at(vars(latitude, longitude), 
+              funs(as.numeric(.)))
 
 # Schools with missing info -----------------------------------------------
-  geo_df_miss <- geo_df %>% 
-    filter(coord_flag == "FALSE" & latitude == "S/dados")
+  
+  geo_df_miss <- 
+    geo_df_sub %>% 
+    filter(coord_flag == "FALSE" & latitude == "S/dados") %>% 
+    # Coerce all the missing values to NA numerica values
+    mutate_at(vars(latitude, longitude), 
+              funs(as.numeric(.)))
   
   write_csv(geo_df_miss,
             file.path(datapath, "2018_VamosLer_School_Missing_Coordinates.csv"))  
@@ -56,7 +60,7 @@ geo_df <- read_excel(file.path(datapath, coord_data),
 # that have coordinates that are likely numbers already
 # grepl -- returns a logical based on a grep condition (here, that a latitude contains a negative)
   geo_df_decdeg <- 
-    geo_df  %>% 
+    geo_df_sub  %>% 
     filter(coord_flag == "FALSE" & latitude != "S/dados") %>% 
     
     #Using the DDMMSS pattern to create a separable entry
@@ -76,16 +80,36 @@ geo_df <- read_excel(file.path(datapath, coord_data),
            longitude = (deg_l + (min_l/60) + (sec_l/3600))) %>% 
     select(-matches("sec|min|deg"))
 
+
+# Row bind everything into final dataset ----------------------------------
+  # Append the new dataframe this to the original data, first slicing the missing vars away
+  geo_df_schools <- bind_rows(geo_df_filled, geo_df_decdeg, geo_df_miss) %>% 
+    arrange(school_id) 
+  
+  # Rejoin to original data
+  geo_df_final <- 
+    geo_df %>% 
+    left_join(geo_df_schools, by = c("X__1" = "school_id"))
+
+# Map out coordinates to see if they make sense
+  geo_df_final %>% 
+    ggplot(aes(x = longitude, y = latitude, colour = Distrito )) +
+    geom_point(size = 3)
+
+# Merge with the tidy dataset for cleaned up version and write to csv
+  tidy_df %>% 
+    left_join(geo_df_schools, by = c("school_id")) %>% 
+    write_csv(., file.path(datapath, "2018_VamosLer_tidy.csv"))
   
 
+# Export final data sets --------------------------------------------------
+
+  write_csv(geo_df_schools, 
+            file.path(datapath, "2018_VamosLer_School_Coordinates_clean.csv"))
   
+  write_csv(geo_df_schools, 
+            file.path(datapath, "2018_VamosLer_School_Coordinates_clean_merged.csv"))
   
-  
-  # Append the new dataframe this to the original data, first slicing the missing vars away
-  geo_coord_df <- 
-    geo_df %>% 
-    left_join(coord_df, by = c("school_id")) %>% 
-    mutate()
     
     
   

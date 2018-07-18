@@ -99,7 +99,7 @@ geo_df <- read_excel(file.path(datapath, coord_data),
 # Merge with the tidy dataset for cleaned up version and write to csv
   tidy_df %>% 
     left_join(geo_df_schools, by = c("school_id")) %>% 
-    write_csv(., file.path(datapath, "2018_VamosLer_tidy.csv"))
+    write_csv(., file.path(datapath, "2018_VamosLer_tidy.csv")) 
   
 
 # Export final data sets --------------------------------------------------

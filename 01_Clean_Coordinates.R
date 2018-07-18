@@ -9,7 +9,7 @@
 
 coord_data <- "Vamos Ler Intervention schools 2018 _ Contacts_ VL_TMD_FINAL.xlsx"
 
-geo_df <- read_excel(file.path(datapath, ler_data), 
+geo_df <- read_excel(file.path(datapath, coord_data), 
                              sheet = "Coordinates")
 
 # Is school code really unique? Appears not to be -- 89 are missing, quite a few dups
@@ -19,7 +19,7 @@ geo_df <- read_excel(file.path(datapath, ler_data),
     tally() %>% 
     filter(n != 1) %>% 
     arrange(-n)
-
+  
 # Keep only what is needed to fix Lat/Lon
   geo_df <- 
     geo_df %>% 
@@ -27,15 +27,39 @@ geo_df <- read_excel(file.path(datapath, ler_data),
            longitude = Long., 
            school_id = X__1, 
            school_name = `Nome da Escola`) %>% 
+    
+    # One school has a negative sign missing from the lat / lon; is a character no
     mutate(latitude = ifelse(school_id == 158, str_c("-", latitude), latitude),
-      coord_flag = (grepl(pattern = "-", latitude)))
+      coord_flag = (grepl(pattern = "-", latitude))) 
+  
+
+# Schools with completed latitude longitude -------------------------------
+
+  geo_df_filled <- 
+    geo_df %>% 
+    filter(coord_flag == "TRUE") %>% 
+    mutate_at(vars(latitude, longitude), funs(as.numeric(.)))
+  
+
+
+# Schools with missing info -----------------------------------------------
+  geo_df_miss <- geo_df %>% 
+    filter(coord_flag == "FALSE" & latitude == "S/dados")
+  
+  write_csv(geo_df_miss,
+            file.path(datapath, "2018_VamosLer_School_Missing_Coordinates.csv"))  
+  
+# Fix degress minutes seconds entries -------------------------------------
+
 
 # We are below the equator, so we can use the "-" of the latitude field to flag observations
 # that have coordinates that are likely numbers already
 # grepl -- returns a logical based on a grep condition (here, that a latitude contains a negative)
-  coord_df <- 
+  geo_df_decdeg <- 
     geo_df  %>% 
     filter(coord_flag == "FALSE" & latitude != "S/dados") %>% 
+    
+    #Using the DDMMSS pattern to create a separable entry
     mutate(latitude = str_replace_all(latitude, fixed(" "), ""), 
         lat_tmp = gsub('°|\"|\'', '_', latitude), 
         
@@ -44,16 +68,20 @@ geo_df <- read_excel(file.path(datapath, ler_data),
           
     separate(lat_tmp, c("deg", "min", "sec"), sep = "_") %>% 
     separate(lon_tmp, c("deg_l", "min_l", "sec_l"), sep = "_") %>% 
+    mutate_at(vars(deg, min, sec, deg_l, min_l, sec_l), funs(as.numeric(.))) %>% 
     
-  # Now rebuild the coordinates
-    mutate(lat_dd = as.numeric(deg) + (as.numeric(min)/60) + (as.numeric(sec)/3600),
-           lon_dd = as.numeric(deg_l) + (as.numeric(min_l)/60) + (as.numeric(sec_l)/3600)) %>% 
+  # Now rebuild the coordinates; multiply latitude by -1 for Southern Hemisphere
+    mutate(latitude = (deg + (min/60) + (sec/3600)),
+           latitude = (latitude * -1),
+           longitude = (deg_l + (min_l/60) + (sec_l/3600))) %>% 
     select(-matches("sec|min|deg"))
 
   
-# TODO: Coerce valid Lat/Lon from the original data to numeric  
+
   
-  # Rejoin this to the original data
+  
+  
+  # Append the new dataframe this to the original data, first slicing the missing vars away
   geo_coord_df <- 
     geo_df %>% 
     left_join(coord_df, by = c("school_id")) %>% 

@@ -55,7 +55,6 @@ geo_df <- read_excel(file.path(datapath, coord_data),
   
 # Fix degress minutes seconds entries -------------------------------------
 
-
 # We are below the equator, so we can use the "-" of the latitude field to flag observations
 # that have coordinates that are likely numbers already
 # grepl -- returns a logical based on a grep condition (here, that a latitude contains a negative)
@@ -83,7 +82,9 @@ geo_df <- read_excel(file.path(datapath, coord_data),
 
 # Row bind everything into final dataset ----------------------------------
   # Append the new dataframe this to the original data, first slicing the missing vars away
-  geo_df_schools <- bind_rows(geo_df_filled, geo_df_decdeg, geo_df_miss) %>% 
+  geo_df_schools <- bind_rows(geo_df_filled, 
+                              geo_df_decdeg, 
+                              geo_df_miss) %>% 
     arrange(school_id) 
   
   # Rejoin to original data

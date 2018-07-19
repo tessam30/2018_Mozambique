@@ -96,6 +96,8 @@ df_mod <-
   str(df_mod)
   sum(duplicated(df_mod$school_id)) # if this is anythign different than 0, not unique
   sum(duplicated(df_mod$school_code))
+  
+# Show the school ID for schools that have negative values
 
 
 # Step 4. Start gathering, separating to reshape the data long
@@ -130,7 +132,9 @@ tmp_gend <- df_mod %>%
                funs(as.numeric(.))) %>% 
      
      # Convert any negative values to positive for classsize
-     mutate(female_classsize = ifelse(female_classsize < 0, (-1*female_classsize), female_classsize),
+     mutate(negative_flag_fem = female_classsize < 0, 
+            negative_flag_male = male_classsize < 0,
+              female_classsize = ifelse(female_classsize < 0, (-1*female_classsize), female_classsize),
             male_classsize = ifelse(male_classsize < 0 , (-1 * male_classsize), male_classsize)) %>% 
      
      # Create grouped variables
@@ -147,6 +151,21 @@ tmp_gend <- df_mod %>%
 # In browsing the data, there appear to be some grades with 0 students and other grades
    # where the student ratio is not reasonable
    summary(tidy_df)
+
+# Opened as an issue on GithHub (https://github.com/tessam30/2018_Mozambique/issues)      
+   tidy_df %>% 
+     filter(negative_flag_fem == "TRUE" | negative_flag_male == "TRUE") %>% 
+     select(school_id, province, district, admin_post, zip_name_no, school_name, school_code) %>% 
+     knitr::kable()
+
+# -- Schools with repeating school id codes
+   df_mod %>% 
+     group_by(school_code) %>% 
+     tally() %>% 
+     filter(n != 1) %>% 
+     arrange(-n) %>% 
+     knitr::kable()
+   
 
 
 # Export tidy datasets ----------------------------------------------------

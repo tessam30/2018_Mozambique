@@ -134,7 +134,7 @@ tmp_gend <- df_mod %>%
      # Convert any negative values to positive for classsize
      mutate(negative_flag_fem = female_classsize < 0, 
             negative_flag_male = male_classsize < 0,
-              female_classsize = ifelse(female_classsize < 0, (-1*female_classsize), female_classsize),
+              female_classsize = ifelse(female_classsize < 0, (-1 * female_classsize), female_classsize),
             male_classsize = ifelse(male_classsize < 0 , (-1 * male_classsize), male_classsize)) %>% 
      
      # Create grouped variables

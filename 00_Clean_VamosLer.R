@@ -1,6 +1,7 @@
 # Purpose: Clean up Vamos Ler! Data for Igor in Mozambique
 # Author: Tim Essam, Ph.D | USAID GeoCenter
 # Date: 2018_07_18
+# Audience: Moz mission + Igor
 
 # Load libraries and data -------------------------------------------------
 
